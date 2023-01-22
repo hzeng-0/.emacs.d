@@ -76,11 +76,6 @@
 (autoload 'ace-jump-mode "ace-jump-mode" nil t)
 (global-set-key [?\C-\;] 'ace-jump-mode)
 
-;; minibuffer show stuff vertical
-
-(require 'vertico)
-(vertico-mode 1)
-
 ;; template
 
 (require 'tim)
