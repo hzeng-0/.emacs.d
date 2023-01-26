@@ -1,5 +1,8 @@
 ;;;;; show definitions from jisho.org  -*- lexical-binding: t; -*-
 
+;;; requires emacs 27, for json parsing
+
+
 (defvar jisho-org-display nil "whether or not to use org-mode for showing defs, if org is alr loaded")
 
 (defun jisho-insert-word-def (word)

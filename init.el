@@ -32,7 +32,11 @@
 
 (recentf-mode 1)
 (show-paren-mode 1)
-(add-hook 'prog-mode-hook 'display-line-numbers-mode)
+
+(if (> emacs-major-version 25)
+    (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'linum-mode))
+
 (add-hook 'prog-mode-hook 'electric-pair-local-mode)
 
 ;; search
@@ -49,11 +53,11 @@
 
 ;; ui
 (menu-bar-mode -1) (scroll-bar-mode -1) (tool-bar-mode -1)
-(setq default-frame-alist (append `((background-color . "black")
-                                    (foreground-color . "peach puff")
-                                    (cursor-color . "pink"))
-                                  default-frame-alist))
-;; (load-theme 'cherry-blossom t)
+;; (setq default-frame-alist (append `((background-color . "black")
+;;                                     (foreground-color . "peach puff")
+;;                                     (cursor-color . "pink"))
+;;                                   default-frame-alist))
+(load-theme 'cherry-blossom t)
 
 
 ;; functions
@@ -81,6 +85,12 @@
 (require 'tim)
 (tim-global-mode)
 
+;; japanese dict
+
+(when (> emacs-major-version 26)
+  (require 'jisho)
+  (global-set-key "\C-cdj" 'jisho-define-at-point))
+
 ;; ;; melpa
 ;; (require 'package)
 ;; (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
@@ -93,7 +103,7 @@
 ;; C, Java
 ;; -----------------------------------------
 
-(setq-default c-basic-offset 4)
+(setq-default c-basic-offset 2)
 (add-hook 'java-mode-hook 'subword-mode)
 
 ;; -----------------------------------------
@@ -139,7 +149,6 @@
     ("fr"   . ("\\frac{" 1 "}{" 2 "}" 0))
     ("lr"   . ("\\left" 1 " " 0 " \\right" 2))
     ("choo" . ("{" 1 " \\choose " 2 "}" 0))
-    ("fp"   . ("\\frac{\\partial" 1 "}{\\partial" 2 "}" 0))
     ("eq"   . ("\\[\n" 0 "\n\\]"))
     ("inl"  . ("\\(\n" 0 "\n\\)"))
     ("te"   . ("\\text{" 0 "}"))
@@ -155,15 +164,3 @@
     ("sb"   . ("\\subset "))
     ("xx"   . ("\\cdot "))
     )))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages '(markdown-mode lua-mode dumb-jump)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
