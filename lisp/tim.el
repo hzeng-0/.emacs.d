@@ -9,7 +9,7 @@
 ;; ###           ###########       ###       ###     
 
 
-;; OVERVIEW
+;; USAGE
 
 ;; Set global or major-mode-specific templates via setting "tim-temps",
 ;; an alist which should look like
@@ -196,10 +196,12 @@ expansion of template. value: template.")
 ;; We can leave tim-insert-mode by tabbing through fields, undoing
 ;; enough times, or by typing C-c C-c
 
+;; We should only enter tim-insert-mode through tim-insert (template expand)
+
 (define-minor-mode tim-insert-mode
   "Minor mode activated when using fields in tim templates."
-  :lighter (:eval (propertize (format " %s tem" tim-depth)
-                              'font-lock-face '(:foreground "red")))
+  :lighter (:eval (propertize " tem"
+                              'font-lock-face '(:foreground "#F94FA0")))
   :keymap `((,tim-next-key . tim-next-part)
             (,tim-prev-key . tim-prev-part)
             (,(kbd "C-c C-c") . ,(lambda nil (interactive)

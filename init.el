@@ -7,12 +7,13 @@
 (setq backup-directory-alist
       `(("." . ,(concat user-emacs-directory ".saves"))))
 
-;; keybinding
+;; keybindings
 
 (global-set-key  [f2] 'shell)
 (global-set-key  [f5 f5] 'revert-buffer)
 (global-set-key  "\C-cr" 'recentf-open-files)
 (global-set-key  [?\C-\'] 'goto-line)
+(global-set-key "\C-cf" 'grep-find)
 (global-set-key "\C-x\C-c" 'save-buffers-kill-emacs)
 
 ;; variables
@@ -20,20 +21,22 @@
 (setq-default indent-tabs-mode nil
               tab-width 2)
 
-(setq sentence-end-double-space nil
-      dired-dwim-target t
-      completion-ignore-case t
-      display-line-numbers-type 'relative
-      read-buffer-completion-ignore-case t
-      delete-by-moving-to-trash t
-      completion-styles '(basic partial-completion substring flex emacs22))
+(setq
+ scroll-step                        8
+ sentence-end-double-space          nil
+ dired-dwim-target                  t
+ completion-ignore-case             t
+ display-line-numbers-type          'relative
+ read-buffer-completion-ignore-case t
+ delete-by-moving-to-trash          t
+ completion-styles                  '(basic partial-completion substring flex emacs22))
 
 ;; minor modes, hooks
 
 (recentf-mode 1)
 (show-paren-mode 1)
 
-(if (> emacs-major-version 25)
+(if (>= emacs-major-version 26)
     (add-hook 'prog-mode-hook 'display-line-numbers-mode)
   (add-hook 'prog-mode-hook 'linum-mode))
 
@@ -87,16 +90,34 @@
 
 ;; japanese dict
 
-(when (> emacs-major-version 26)
+(when (>= emacs-major-version 27)
   (require 'jisho)
   (global-set-key "\C-cdj" 'jisho-define-at-point))
 
-;; ;; melpa
-;; (require 'package)
-;; (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
+;; melpa --------------------
+
+(require 'package)
+(add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 ;; (package-refresh-contents)
-;; (package-install 'dumb-jump)
-;; (add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
+
+;; multiple cursor
+(package-install 'multiple-cursors)
+(global-set-key (kbd "C-S-c C-S-c") 'mc/edit-lines)
+(global-set-key (kbd "C->") 'mc/mark-next-like-this)
+(global-set-key (kbd "C-<") 'mc/mark-previous-like-this)
+(global-set-key (kbd "C-M->") 'mc/skip-to-next-like-this)
+(global-set-key (kbd "C-M-<") 'mc/skip-to-previous-like-this)
+(global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
+
+;; big minibuffer
+
+(when (>= emacs-major-version 27)
+  (package-install 'vertico)
+  (vertico-mode)
+
+  (package-install 'consult)
+
+  )
 
 
 ;; -----------------------------------------
@@ -164,3 +185,20 @@
     ("sb"   . ("\\subset "))
     ("xx"   . ("\\cdot "))
     )))
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(custom-safe-themes
+   '("28901e08b6f66c55f1528c519679c237689aa3ded6641fbd1ee5022507c91d58" default))
+ '(fringe-mode 6 nil (fringe))
+ '(linum-format 'dynamic)
+ '(package-selected-packages
+   '(eglot consult vertico multiple-cursors markdown-mode lua-mode dumb-jump)))
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
