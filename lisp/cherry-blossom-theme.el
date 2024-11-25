@@ -71,7 +71,7 @@
     (t (:background "#2b283d" :box nil :foreground "#8c86e4" :height 85))))
 
  '(mode-line-inactive
-   ((((class color) (min-colors 88)) (:background "#111111" :foreground "#000000"))
+   ((((class color) (min-colors 88)) (:background "#111111" :foreground "#8c86e4"))
     (t (:weight light :box nil :background "#202339" :foreground "#000000" :inherit (mode-line)))))
  
  '(mode-line-emphasis ((t (:weight bold))))

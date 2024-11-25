@@ -6,6 +6,5 @@ tramp
 
 # Folders
 
-auto-save-list/
-.saves/
+etc/
 elpa/

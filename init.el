@@ -1,104 +1,105 @@
-;; -----------------------------------------
-;; general stuff
-;; -----------------------------------------
+;;; ----- etc folder -----
+(defun etc (str) (concat user-emacs-directory "etc/" str))
+(setq custom-file                (etc "custom.el")
+      auto-save-list-file-prefix (etc "auto-save-list/")
+      backup-directory-alist     `(("." . ,(etc ".saves/")))
+      recentf-save-file          (etc "recentf"))
 
-;; backups in single directory
+;;; ----- keys -----
+(global-set-key  (kbd "<f2>")      'shell)
+(global-set-key  (kbd "<f5> <f5>") 'revert-buffer)
+(global-set-key  (kbd "<f5> <f6>") 'eval-buffer)
+(global-set-key  (kbd "C-c r")     'recentf-open-files)
+(global-set-key  (kbd "C-'")       'goto-line)
+(global-set-key  (kbd "M-j")       (lambda () (interactive) (join-line -1)))
+(global-set-key  (kbd "C-c f")     'grep-find)
+(global-set-key  (kbd "C-x C-c")   'save-buffers-kill-emacs)
 
-(setq backup-directory-alist
-      `(("." . ,(concat user-emacs-directory ".saves"))))
 
-;; keybindings
+;;; ----- settings -----
+(setq-default indent-tabs-mode           nil)  ; 2 spaces for indent
+(setq-default tab-width                  2)    ;
+(setq scroll-step                        8)    ; scrolling
+(setq sentence-end-double-space          nil)  ;
+(setq dired-dwim-target                  t)    ; ez move file between folders
+(setq completion-ignore-case             t)    ; caseless minibuffer completion
+(setq read-buffer-completion-ignore-case t)    ; ... except filenames
+(setq display-line-numbers-type          t)    ; global line numbers
+(setq delete-by-moving-to-trash          t)    ; recycle bin
+(setq completion-styles                        ;
+      '(basic partial-completion substring flex emacs22))
 
-(global-set-key  [f2] 'shell)
-(global-set-key  [f5 f5] 'revert-buffer)
-(global-set-key  "\C-cr" 'recentf-open-files)
-(global-set-key  [?\C-\'] 'goto-line)
-(global-set-key "\C-cf" 'grep-find)
-(global-set-key "\C-x\C-c" 'save-buffers-kill-emacs)
 
-;; variables
+;;; ----- garbage collection -----
+(setq gc-cons-threshold #x4000000)
+(defvar k-gc-timer (run-with-idle-timer 15 t (lambda nil (garbage-collect))))
 
-(setq-default indent-tabs-mode nil
-              tab-width 2)
 
-(setq
- scroll-step                        8
- sentence-end-double-space          nil
- dired-dwim-target                  t
- completion-ignore-case             t
- display-line-numbers-type          'relative
- read-buffer-completion-ignore-case t
- delete-by-moving-to-trash          t
- completion-styles                  '(basic partial-completion substring flex emacs22))
-
-;; minor modes, hooks
-
-(recentf-mode 1)
-(show-paren-mode 1)
-
-(if (>= emacs-major-version 26)
-    (add-hook 'prog-mode-hook 'display-line-numbers-mode)
-  (add-hook 'prog-mode-hook 'linum-mode))
-
-(add-hook 'prog-mode-hook 'electric-pair-local-mode)
-
-;; search
-
+;;; ----- searching -----
 (setq lazy-highlight-initial-delay 0.10
       isearch-lazy-count t
       lazy-count-suffix-format " {%s/%s}"
       lazy-count-prefix-format nil)
 
-;; garbage collect
+;;; ----- turn on off -----
+(recentf-mode 1)
+(show-paren-mode 1)
+(blink-cursor-mode 0)
+(if (>= emacs-major-version 26)
+    (add-hook 'prog-mode-hook 'display-line-numbers-mode)
+  (add-hook 'prog-mode-hook 'linum-mode))
+(add-hook 'prog-mode-hook 'electric-pair-local-mode)
 
-(setq gc-cons-threshold #x4000000)
-(defvar k-gc-timer (run-with-idle-timer 15 t (lambda nil (garbage-collect))))
-
-;; ui
+;;; ----- ui -----
 (menu-bar-mode -1) (scroll-bar-mode -1) (tool-bar-mode -1)
-;; (setq default-frame-alist (append `((background-color . "black")
-;;                                     (foreground-color . "peach puff")
-;;                                     (cursor-color . "pink"))
-;;                                   default-frame-alist))
-(load-theme 'cherry-blossom t)
+(add-to-list 'custom-theme-load-path (concat user-emacs-directory "lisp"))
+;; (load-theme 'cherry-blossom t)
+(package-install 'nyan-mode)
+(nyan-mode)(nyan-start-animation)(nyan-toggle-wavy-trail)
+
+(setq fancy-splash-image (expand-file-name "~/.emacs.d/nadeko.jpg"))
+
+(setq zone-timer (run-with-idle-timer
+                  1800 t
+                  (lambda nil (interactive) (when (= 0 (random 3)) (zone)))))
 
 
-;; functions
-
-(defun gogo (filename program)
+;;; ----- useful functions -----
+;; open file in external program
+(defun hh-open (filename program)
   (interactive (list (file-relative-name (read-file-name "what file: "))
                      (read-string "what program: " nil nil "xdg-open")))
   (call-process-shell-command
    (concat "nohup " program " \"" filename "\" &") nil 0))
-(global-set-key "\C-co" 'gogo)
+(global-set-key "\C-co" 'hh-open)
 
-;; -----------------------------------------
-;; packages
-;; -----------------------------------------
 
+;; get recursive folder size in dired file browser
+(defun dired-get-size ()
+  (interactive)
+  (let ((files (dired-get-marked-files)))
+    (with-temp-buffer
+      (apply 'call-process "/usr/bin/du" nil t nil "-sch" files)
+      (message "size of all marked files: %s"
+               (progn 
+                 (re-search-backward "\\(^[0-9.,]+[A-Za-z]+\\).*total$")
+                 (match-string 1))))))
+
+
+;;; ----- load elisp -----
 (add-to-list 'load-path (concat user-emacs-directory "lisp"))
-
-;; jump to words
-
-(autoload 'ace-jump-mode "ace-jump-mode" nil t)
-(global-set-key [?\C-\;] 'ace-jump-mode)
-
-;; template
-
-(require 'tim)
-(tim-global-mode)
-
-;; japanese dict
-
-(when (>= emacs-major-version 27)
-  (require 'jisho)
-  (global-set-key "\C-cdj" 'jisho-define-at-point))
-
-;; melpa --------------------
 
 (require 'package)
 (add-to-list 'package-archives '("melpa" . "https://melpa.org/packages/"))
 ;; (package-refresh-contents)
+
+;; jump in windows
+(autoload 'ace-jump-mode "ace-jump-mode" nil t)
+(global-set-key [?\C-\;] 'ace-jump-mode)
+
+;; template
+(require 'tem)
+(tem-global-mode)
 
 ;; multiple cursor
 (package-install 'multiple-cursors)
@@ -109,47 +110,43 @@
 (global-set-key (kbd "C-M-<") 'mc/skip-to-previous-like-this)
 (global-set-key (kbd "C-c C-<") 'mc/mark-all-like-this)
 
-;; big minibuffer
-
+;; vertical minibuffer
 (when (>= emacs-major-version 27)
   (package-install 'vertico)
   (vertico-mode)
-
   (package-install 'consult)
-
+  (global-set-key "\C-cf" 'consult-grep)
   )
 
+;; dumb jump
+(add-hook 'xref-backend-functions #'dumb-jump-xref-activate)
 
-;; -----------------------------------------
-;; C, Java
-;; -----------------------------------------
 
-(setq-default c-basic-offset 2)
+;;; ----- languages / misc berk -----
+
+;; C
+(setq-default c-basic-offset 4)
+
+;; Java
 (add-hook 'java-mode-hook 'subword-mode)
 
-;; -----------------------------------------
 ;; Python
-;; -----------------------------------------
-
 (setq python-shell-interpreter "python3")
 
-;; -----------------------------------------
-;; Latex
-;; -----------------------------------------
+;; Julia
+(add-to-list 'load-path  "/home/zeng/.juliaup/bin")
+(require 'julia-repl)
+(add-hook 'julia-mode-hook 'julia-repl-mode)
+(setq julia-repl-executable-records '((default "julia")                  ; in the executable path
+                                       (master ,(expand-file-name "~/.juliaup/bin/julia"))))
 
+;; Latex
 (add-hook 'tex-mode-hook 'latex-electric-env-pair-mode)
 (add-hook 'tex-mode-hook 'display-line-numbers-mode)
 
-;; get pdf
-
 (setq pdfify "pdflatex") ; can specify with buffer-local variable
 
-(defun go-latexmk nil
-  (interactive)
-  (async-shell-command (concat "latexmk -pdf -pvc " (buffer-file-name))
-                       (generate-new-buffer "latexmk")))
-
-(defun go-pdfify nil
+(defun hh-pdfify nil
   (interactive)
   (async-shell-command (concat "yes \"\" | " pdfify " " (buffer-file-name))))
 
@@ -157,20 +154,20 @@
              '("\\*Async Shell Command\\*.*" display-buffer-no-window))
 
 (require 'tex-mode)
-(define-key tex-mode-map "\C-c\C-l" 'go-pdfify)
+(define-key tex-mode-map "\C-c\C-l" 'hh-pdfify)
 
-;; latex templates
-
-(require 'tim)
+;; templates
+(require 'tem)
 (add-to-list
- 'tim-temps
+ 'tem-temps
  '(latex-mode
    .
    (
     ("fr"   . ("\\frac{" 1 "}{" 2 "}" 0))
     ("lr"   . ("\\left" 1 " " 0 " \\right" 2))
     ("choo" . ("{" 1 " \\choose " 2 "}" 0))
-    ("eq"   . ("\\[\n" 0 "\n\\]"))
+    ("ee"   . ("\\[\n" 0 "\n\\]"))
+    ("eq"   . ("\\begin{equation}\n" 0 "\n\\end{equation}"))
     ("inl"  . ("\\(\n" 0 "\n\\)"))
     ("te"   . ("\\text{" 0 "}"))
     ("eqv"  . ("\\equiv "))
@@ -185,20 +182,12 @@
     ("sb"   . ("\\subset "))
     ("xx"   . ("\\cdot "))
     )))
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(custom-safe-themes
-   '("28901e08b6f66c55f1528c519679c237689aa3ded6641fbd1ee5022507c91d58" default))
- '(fringe-mode 6 nil (fringe))
- '(linum-format 'dynamic)
- '(package-selected-packages
-   '(eglot consult vertico multiple-cursors markdown-mode lua-mode dumb-jump)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
+
+(add-to-list
+ 'tem-temps
+ '(emacs-lisp-mode
+   .
+   (
+    ("yo"   . (";;; ----- " 1 " -----" 0))
+
+    )))

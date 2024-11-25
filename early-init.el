@@ -1,0 +1,6 @@
+;; (set-background-color "honeydew2")
+(set-face-attribute 'default nil :height 130)
+;; (setq default-frame-alist (append `((background-color . "black")
+;;                                     (foreground-color . "peach puff")
+;;                                     (cursor-color . "pink"))
+;;                                   default-frame-alist))
